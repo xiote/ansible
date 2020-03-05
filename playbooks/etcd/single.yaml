@@ -1,11 +1,9 @@
 - name: Set up single etcd cluster
-  hosts: srv_15_215
+  hosts: single_etcd
   become: True
   vars:
     conf_file: kubeadmcfg.yaml
     kubelet_conf_file: /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
-    server_name: srv_15_215
-    server_host: 10.128.15.215
   tasks:
 
     - name: cp files/kubeadmcfg.yaml

@@ -3,14 +3,14 @@ kind: ClusterConfiguration
 etcd:
     local:
         serverCertSANs:
-        - "{{ server_host }}"
+        - "{{ ansible_host }}"
         peerCertSANs:
-        - "{{ server_host }}"
+        - "{{ ansible_host }}"
         extraArgs:
-            initial-cluster: {{ server_name }}=https://{{ server_host }}:2380
+            initial-cluster: {{ inventory_hostname }}=https://{{ ansible_host }}:2380
             initial-cluster-state: new
-            name: {{ server_name }}
-            listen-peer-urls: https://{{ server_host }}:2380
-            listen-client-urls: https://{{ server_host }}:2379
-            advertise-client-urls: https://{{ server_host }}:2379
-            initial-advertise-peer-urls: https://{{ server_host }}:2380
+            name: {{ inventory_hostname }}
+            listen-peer-urls: https://{{ ansible_host }}:2380
+            listen-client-urls: https://{{ ansible_host }}:2379
+            advertise-client-urls: https://{{ ansible_host }}:2379
+            initial-advertise-peer-urls: https://{{ ansible_host }}:2380
