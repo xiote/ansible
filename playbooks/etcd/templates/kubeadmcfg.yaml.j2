@@ -1,0 +1,16 @@
+apiVersion: "kubeadm.k8s.io/v1beta2"
+kind: ClusterConfiguration
+etcd:
+    local:
+        serverCertSANs:
+        - "{{ server_host }}"
+        peerCertSANs:
+        - "{{ server_host }}"
+        extraArgs:
+            initial-cluster: {{ server_name }}=https://{{ server_host }}:2380
+            initial-cluster-state: new
+            name: {{ server_name }}
+            listen-peer-urls: https://{{ server_host }}:2380
+            listen-client-urls: https://{{ server_host }}:2379
+            advertise-client-urls: https://{{ server_host }}:2379
+            initial-advertise-peer-urls: https://{{ server_host }}:2380

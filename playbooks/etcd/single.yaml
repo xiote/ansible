@@ -1,0 +1,66 @@
+- name: Set up single etcd cluster
+  hosts: srv_15_215
+  become: True
+  vars:
+    conf_file: kubeadmcfg.yaml
+    kubelet_conf_file: /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+    server_name: srv_15_215
+    server_host: 10.128.15.215
+  tasks:
+
+    - name: cp files/kubeadmcfg.yaml
+      template: src=templates/kubeadmcfg.yaml.j2 dest={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-ca
+      shell: sudo kubeadm init phase certs etcd-ca
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-server --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-server --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-peer --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-peer --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-healthcheck-client --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-healthcheck-client --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs apiserver-etcd-client --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs apiserver-etcd-client --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase etcd local --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase etcd local --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: cp files/etcd-service-manager.conf
+      copy: src=files/etcd-service-manager.conf dest={{ kubelet_conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+  handlers:
+    - name: restart kubelet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: kubelet
+      register: result
+    - debug: var=result 
