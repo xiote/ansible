@@ -1,0 +1,26 @@
+- name: Set up nginx with no tls
+  hosts: webservers
+  become: True
+  tasks:
+    - name: apt install nginx
+      apt: name=nginx update_cache=yes
+
+    - name: cp files/nginx.conf /etc/nginx/sites-available/default
+      copy: 
+        src: files/nginx.conf 
+        dest: /etc/nginx/sites-available/default
+
+    - name: ln -s /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
+      file: 
+        dest: /etc/nginx/sites-enabled/default
+        src: /etc/nginx/sites-available/default
+        state: link
+
+    - name: template templates/index.html.j2 /usr/share/nginx/html/index.html 0644
+      template: 
+        src: templates/index.html.j2 
+        dest: /usr/share/nginx/html/index.html
+        mode: 0644
+
+    - name: service nginx restart
+      service: name=nginx state=restarted
