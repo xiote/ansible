@@ -1,2 +1,9 @@
-[single_etcd]
-srv_15_216 ansible_host=10.128.15.216 ansible_port=22 ansible_python_interpreter=/usr/bin/python3
+[etcd]
+etcd04 ansible_host=10.128.15.219 ansible_port=22 ansible_python_interpreter=/usr/bin/python3
+etcd05 ansible_host=10.128.15.220 ansible_port=22 ansible_python_interpreter=/usr/bin/python3
+
+[etcd_member]
+etcd05 endpoints=https://10.128.15.219:2379 
+
+[etcd_single]
+etcd04

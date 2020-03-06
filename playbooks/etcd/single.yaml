@@ -1,5 +1,5 @@
 - name: Set up single etcd cluster
-  hosts: single_etcd
+  hosts: etcd_single
   become: True
   vars:
     conf_file: kubeadmcfg.yaml
