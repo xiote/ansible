@@ -1,0 +1,61 @@
+- name: Set up single etcd cluster
+  hosts: etcd_member
+  remote_user: xiote78
+  become: True
+  become_method: sudo
+  vars:
+    conf_file: kubeadmcfg.yaml
+    kubelet_conf_file: /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+    ca_crt_file: /etc/kubernetes/pki
+  tasks:
+    - name: copy /etc/kubernetes/pki
+      synchronize: src=/etc/kubernetes/pki dest=/etc/kubernetes/pki
+      delegate_to: master
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-server --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-server --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-peer --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-peer --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs etcd-healthcheck-client --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs etcd-healthcheck-client --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase certs apiserver-etcd-client --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase certs apiserver-etcd-client --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: sudo kubeadm init phase etcd local --config=kubeadmcfg.yaml
+      shell: sudo kubeadm init phase etcd local --config={{ conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+    - name: cp files/etcd-service-manager.conf
+      copy: src=files/etcd-service-manager.conf dest={{ kubelet_conf_file }}
+      notify: restart kubelet
+      register: result
+    - debug: var=result 
+
+  handlers:
+    - name: restart kubelet
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: kubelet
+      register: result
+    - debug: var=result 
